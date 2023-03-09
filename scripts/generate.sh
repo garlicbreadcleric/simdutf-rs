@@ -6,7 +6,5 @@ popd
 cp ./simdutf/singleheader/simdutf.h   ./cpp
 cp ./simdutf/singleheader/simdutf.cpp ./cpp
 
-pushd ./cpp
-    sed -i 's/^\/\/ dofile.*//g' simdutf.h
-    sed -i 's/^\/\/ dofile.*//g' simdutf.cpp
-popd
+python3 ./scripts/strip-comments.py ./cpp/simdutf.h
+python3 ./scripts/strip-comments.py ./cpp/simdutf.cpp

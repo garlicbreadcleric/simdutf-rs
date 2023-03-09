@@ -1,12 +1,10 @@
 /* auto-generated on 2022-07-25 16:36:20 -0400. Do not edit! */
-
 /* begin file include/simdutf.h */
 #ifndef SIMDUTF_H
 #define SIMDUTF_H
 #include <string>
 #include <cstring>
 #include <vector>
-
 
 /* begin file include/simdutf/compiler_check.h */
 #ifndef SIMDUTF_COMPILER_CHECK_H
@@ -24,17 +22,14 @@
 #endif
 #endif
 
-// C++ 17
 #if !defined(SIMDUTF_CPLUSPLUS17) && (SIMDUTF_CPLUSPLUS >= 201703L)
 #define SIMDUTF_CPLUSPLUS17 1
 #endif
 
-// C++ 14
 #if !defined(SIMDUTF_CPLUSPLUS14) && (SIMDUTF_CPLUSPLUS >= 201402L)
 #define SIMDUTF_CPLUSPLUS14 1
 #endif
 
-// C++ 11
 #if !defined(SIMDUTF_CPLUSPLUS11) && (SIMDUTF_CPLUSPLUS >= 201103L)
 #define SIMDUTF_CPLUSPLUS11 1
 #endif
@@ -45,13 +40,11 @@
 
 #endif // SIMDUTF_COMPILER_CHECK_H
 /* end file include/simdutf/compiler_check.h */
-
 /* begin file include/simdutf/common_defs.h */
 #ifndef SIMDUTF_COMMON_DEFS_H
 #define SIMDUTF_COMMON_DEFS_H
 
 #include <cassert>
-
 /* begin file include/simdutf/portability.h */
 #ifndef SIMDUTF_PORTABILITY_H
 #define SIMDUTF_PORTABILITY_H
@@ -62,7 +55,6 @@
 #include <cfloat>
 #include <cassert>
 #ifndef _WIN32
-// strcasecmp, strncasecmp
 #include <strings.h>
 #endif
 
@@ -79,18 +71,13 @@
  *
  */
 #ifdef __clang__
-// clang under visual studio
 #define SIMDUTF_CLANG_VISUAL_STUDIO 1
 #else
-// just regular visual studio (best guess)
 #define SIMDUTF_REGULAR_VISUAL_STUDIO 1
 #endif // __clang__
 #endif // _MSC_VER
 
 #ifdef SIMDUTF_REGULAR_VISUAL_STUDIO
-// https://en.wikipedia.org/wiki/C_alternative_tokens
-// This header should have no effect, except maybe
-// under Visual Studio.
 #include <iso646.h>
 #endif
 
@@ -99,18 +86,11 @@
 #elif defined(__aarch64__) || defined(_M_ARM64)
 #define SIMDUTF_IS_ARM64 1
 #elif defined(__PPC64__) || defined(_M_PPC64)
-//#define SIMDUTF_IS_PPC64 1
 #pragma message("The simdutf library does yet support SIMD acceleration under\
 POWER processors. Please see https://github.com/lemire/simdutf/issues/51")
 #else
-// The simdutf library is designed
-// for 64-bit processors and it seems that you are not
-// compiling for a known 64-bit platform. Please
-// use a 64-bit target such as x64 or 64-bit ARM for best performance.
 #define SIMDUTF_IS_32BITS 1
 
-// We do not support 32-bit platforms, but it can be
-// handy to identify them.
 #if defined(_M_IX86) || defined(__i386__)
 #define SIMDUTF_IS_X86_32BITS 1
 #elif defined(__arm__) || defined(_M_ARM)
@@ -131,39 +111,20 @@ use a 64-bit target such as x64, 64-bit ARM or 64-bit PPC.")
 #endif // SIMDUTF_NO_PORTABILITY_WARNING
 #endif // SIMDUTF_IS_32BITS
 
-// this is almost standard?
 #undef STRINGIFY_IMPLEMENTATION_
 #undef STRINGIFY
 #define STRINGIFY_IMPLEMENTATION_(a) #a
 #define STRINGIFY(a) STRINGIFY_IMPLEMENTATION_(a)
 
-// Our fast kernels require 64-bit systems.
-//
-// On 32-bit x86, we lack 64-bit popcnt, lzcnt, blsr instructions.
-// Furthermore, the number of SIMD registers is reduced.
-//
-// On 32-bit ARM, we would have smaller registers.
-//
-// The simdutf users should still have the fallback kernel. It is
-// slower, but it should run everywhere.
 
-//
-// Enable valid runtime implementations, and select SIMDUTF_BUILTIN_IMPLEMENTATION
-//
 
-// We are going to use runtime dispatch.
 #ifdef SIMDUTF_IS_X86_64
 #ifdef __clang__
-// clang does not have GCC push pop
-// warning: clang attribute push can't be used within a namespace in clang up
-// til 8.0 so SIMDUTF_TARGET_REGION and SIMDUTF_UNTARGET_REGION must be *outside* of a
-// namespace.
 #define SIMDUTF_TARGET_REGION(T)                                                       \
   _Pragma(STRINGIFY(                                                           \
       clang attribute push(__attribute__((target(T))), apply_to = function)))
 #define SIMDUTF_UNTARGET_REGION _Pragma("clang attribute pop")
 #elif defined(__GNUC__)
-// GCC is easier
 #define SIMDUTF_TARGET_REGION(T)                                                       \
   _Pragma("GCC push_options") _Pragma(STRINGIFY(GCC target(T)))
 #define SIMDUTF_UNTARGET_REGION _Pragma("GCC pop_options")
@@ -171,28 +132,19 @@ use a 64-bit target such as x64, 64-bit ARM or 64-bit PPC.")
 
 #endif // x86
 
-// Default target region macros don't do anything.
 #ifndef SIMDUTF_TARGET_REGION
 #define SIMDUTF_TARGET_REGION(T)
 #define SIMDUTF_UNTARGET_REGION
 #endif
 
-// Is threading enabled?
 #if defined(_REENTRANT) || defined(_MT)
 #ifndef SIMDUTF_THREADS_ENABLED
 #define SIMDUTF_THREADS_ENABLED
 #endif
 #endif
 
-// workaround for large stack sizes under -O0.
-// https://github.com/simdutf/simdutf/issues/691
 #ifdef __APPLE__
 #ifndef __OPTIMIZE__
-// Apple systems have small stack sizes in secondary threads.
-// Lack of compiler optimization may generate high stack usage.
-// Users may want to disable threads for safety, but only when
-// in debug mode which we detect by the fact that the __OPTIMIZE__
-// macro is not defined.
 #undef SIMDUTF_THREADS_ENABLED
 #endif
 #endif
@@ -207,15 +159,9 @@ use a 64-bit target such as x64, 64-bit ARM or 64-bit PPC.")
 #endif
 
 #ifdef SIMDUTF_VISUAL_STUDIO
-// This is one case where we do not distinguish between
-// regular visual studio and clang under visual studio.
-// clang under Windows has _stricmp (like visual studio) but not strcasecmp (as clang normally has)
 #define simdutf_strcasecmp _stricmp
 #define simdutf_strncasecmp _strnicmp
 #else
-// The strcasecmp, strncasecmp, and strcasestr functions do not work with multibyte strings (e.g. UTF-8).
-// So they are only useful for ASCII in our context.
-// https://www.gnu.org/software/libunistring/manual/libunistring.html#char-_002a-strings
 #define simdutf_strcasecmp strcasecmp
 #define simdutf_strncasecmp strncasecmp
 #endif
@@ -242,7 +188,6 @@ use a 64-bit target such as x64, 64-bit ARM or 64-bit PPC.")
 
 
 #if defined(__GNUC__)
-  // Marks a block with a name so that MCA analysis can see it.
   #define SIMDUTF_BEGIN_DEBUG_BLOCK(name) __asm volatile("# LLVM-MCA-BEGIN " #name);
   #define SIMDUTF_END_DEBUG_BLOCK(name) __asm volatile("# LLVM-MCA-END " #name);
   #define SIMDUTF_DEBUG_BLOCK(name, block) BEGIN_DEBUG_BLOCK(name); block; END_DEBUG_BLOCK(name);
@@ -252,7 +197,6 @@ use a 64-bit target such as x64, 64-bit ARM or 64-bit PPC.")
   #define SIMDUTF_DEBUG_BLOCK(name, block)
 #endif
 
-// Align to N-byte boundary
 #define SIMDUTF_ROUNDUP_N(a, n) (((a) + ((n)-1)) & ~((n)-1))
 #define SIMDUTF_ROUNDDOWN_N(a, n) ((a) & ~((n)-1))
 
@@ -276,8 +220,6 @@ use a 64-bit target such as x64, 64-bit ARM or 64-bit PPC.")
   #define SIMDUTF_PUSH_DISABLE_WARNINGS __pragma(warning( push ))
   #define SIMDUTF_PUSH_DISABLE_ALL_WARNINGS __pragma(warning( push, 0 ))
   #define SIMDUTF_DISABLE_VS_WARNING(WARNING_NUMBER) __pragma(warning( disable : WARNING_NUMBER ))
-  // Get rid of Intellisense-only warnings (Code Analysis)
-  // Though __has_include is C++17, it is supported in Visual Studio 2017 or better (_MSC_VER>=1910).
   #ifdef __has_include
   #if __has_include(<CppCoreCheck\Warnings.h>)
   #include <CppCoreCheck\Warnings.h>
@@ -309,7 +251,6 @@ use a 64-bit target such as x64, 64-bit ARM or 64-bit PPC.")
   #endif
 
   #define SIMDUTF_PUSH_DISABLE_WARNINGS _Pragma("GCC diagnostic push")
-  // gcc doesn't seem to disable all warnings with all and extra, add warnings here as necessary
   #define SIMDUTF_PUSH_DISABLE_ALL_WARNINGS SIMDUTF_PUSH_DISABLE_WARNINGS \
     SIMDUTF_DISABLE_GCC_WARNING(-Weffc++) \
     SIMDUTF_DISABLE_GCC_WARNING(-Wall) \
@@ -352,13 +293,11 @@ use a 64-bit target such as x64, 64-bit ARM or 64-bit PPC.")
     #define SIMDUTF_DLLIMPORTEXPORT
 #endif
 
-/// If EXPR is an error, returns it.
 #define SIMDUTF_TRY(EXPR) { auto _err = (EXPR); if (_err) { return _err; } }
 
 
 #endif // SIMDUTF_COMMON_DEFS_H
 /* end file include/simdutf/common_defs.h */
-
 /* begin file include/simdutf/encoding_types.h */
 #include <string>
 
@@ -380,7 +319,6 @@ enum endianness {
 
 std::string to_string(encoding_type bom);
 
-// Note that BOM for UTF8 is discouraged.
 namespace BOM {
 
 /**
@@ -407,11 +345,7 @@ size_t bom_byte_size(encoding_type bom);
 SIMDUTF_PUSH_DISABLE_WARNINGS
 SIMDUTF_DISABLE_UNDESIRED_WARNINGS
 
-// Public API
-
 /* begin file include/simdutf/simdutf_version.h */
-// /include/simdutf/simdutf_version.h automatically generated by release.py,
-// do not change by hand
 #ifndef SIMDUTF_SIMDUTF_VERSION_H
 #define SIMDUTF_SIMDUTF_VERSION_H
 
@@ -437,7 +371,6 @@ enum {
 
 #endif // SIMDUTF_SIMDUTF_VERSION_H
 /* end file include/simdutf/simdutf_version.h */
-
 /* begin file include/simdutf/implementation.h */
 #ifndef SIMDUTF_IMPLEMENTATION_H
 #define SIMDUTF_IMPLEMENTATION_H
@@ -446,7 +379,6 @@ enum {
 #include <atomic>
 #endif
 #include <vector>
-
 /* begin file include/simdutf/internal/isadetection.h */
 /* From
 https://github.com/endorno/pytorch/blob/master/torch/lib/TH/generic/simd/simd.h
@@ -549,14 +481,10 @@ static inline uint32_t detect_supported_architectures() {
 
 namespace {
 namespace cpuid_bit {
-    // Can be found on Intel ISA Reference for CPUID
 
-    // EAX = 0x01
     constexpr uint32_t pclmulqdq = uint32_t(1) << 1; ///< @private bit  1 of ECX for EAX=0x1
     constexpr uint32_t sse42 = uint32_t(1) << 20;    ///< @private bit 20 of ECX for EAX=0x1
 
-    // EAX = 0x7f (Structured Extended Feature Flags), ECX = 0x00 (Sub-leaf)
-    // See: "Table 3-8. Information Returned by CPUID Instruction"
     namespace ebx {
       constexpr uint32_t bmi1 = uint32_t(1) << 3;
       constexpr uint32_t avx2 = uint32_t(1) << 5;
@@ -613,7 +541,6 @@ static inline uint32_t detect_supported_architectures() {
   uint32_t edx = 0;
   uint32_t host_isa = 0x0;
 
-  // EBX for EAX=0x1
   eax = 0x1;
   cpuid(&eax, &ebx, &ecx, &edx);
 
@@ -625,7 +552,6 @@ static inline uint32_t detect_supported_architectures() {
     host_isa |= instruction_set::PCLMULQDQ;
   }
 
-  // ECX for EAX=0x7
   eax = 0x7;
   ecx = 0x0; // Sub-leaf = 0
   cpuid(&eax, &ebx, &ecx, &edx);
@@ -1870,10 +1796,6 @@ extern SIMDUTF_DLLIMPORTEXPORT internal::atomic_ptr<const implementation> active
 /* end file include/simdutf/implementation.h */
 
 
-// Implementation-internal files (must be included before the implementations themselves, to keep
-// amalgamation working--otherwise, the first time a file is included, it might be put inside the
-// #ifdef SIMDUTF_IMPLEMENTATION_ARM64/FALLBACK/etc., which means the other implementations can't
-// compile unless that implementation is turned on).
 
 
 SIMDUTF_POP_DISABLE_WARNINGS

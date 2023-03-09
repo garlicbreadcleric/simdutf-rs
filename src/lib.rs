@@ -3,14 +3,13 @@
 //! This crate is the rust binding of [simdutf](https://github.com/simdutf/simdutf).
 
 #![deny(
-    missing_docs,
-    missing_debug_implementations,
-    clippy::all,
-    clippy::cargo,
-    clippy::missing_inline_in_public_items,
-    clippy::must_use_candidate
+  missing_docs,
+  missing_debug_implementations,
+  clippy::all,
+  clippy::cargo,
+  clippy::missing_inline_in_public_items,
+  clippy::must_use_candidate
 )]
-#![cfg_attr(not(test), no_std)]
 
 mod bindings;
 

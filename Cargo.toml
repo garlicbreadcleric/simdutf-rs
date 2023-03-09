@@ -1,12 +1,12 @@
 [package]
 name = "simdutf"
-version = "0.3.0"
+version = "0.3.2"
 edition = "2021"
 license = "MIT"
 description = "Unicode validation and transcoding at billions of characters per second"
-repository = "https://github.com/Nugine/simdutf-rs"
+repository = "https://github.com/garlicbreadcleric/simdutf-rs"
 keywords = ["utf8", "unicode", "string", "validation", "simd"]
-categories = ["encoding", "algorithms", "no-std", "text-processing"]
+categories = ["encoding", "algorithms", "text-processing"]
 
 [profile.release]
 lto = "fat"
